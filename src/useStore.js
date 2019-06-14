@@ -1,26 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { Subject, merge } from "rxjs";
-import { scan } from "rxjs/operators";
+import React, { useEffect, useState } from 'react';
+import { Subject, merge } from 'rxjs';
+import { scan } from 'rxjs/operators';
+import { merge as lodashMerge } from 'lodash';
 
 const action$ = new Subject();
 
 const useStore = (reducers, initialState = {}, middleware) => {
   const [state, update] = useState(initialState);
-  console.log(initialState);
+
   const dispatch = next => action$.next(next);
 
+  /* eslint ignore */
   useEffect(() => {
     const s = merge(action$)
       .pipe(
-        scan((state, action) => {
-          // NOTE: currently I can see the only way to add reducer name on actions
-          // to recognize which reducer to pick???
-
-          // TODO: select appropriate reducer and state for that reducer
-          // reducers[todos](state[todos], actions)
-
-          return reducers(state, action);
-        }, initialState)
+        scan((prevState, action) => {
+          // NOTE: for loop doesnt work here, only the first item is taken out
+          const reducerKeys = Object.keys(reducers);
+          for (const key of reducerKeys) {
+            const reducer = reducers[key];
+            console.log(key);
+            return {
+              ...prevState,
+              [key]: reducer(prevState[key], action),
+            };
+          }
+        }, initialState),
       )
       .subscribe(update);
 
@@ -32,16 +37,16 @@ const useStore = (reducers, initialState = {}, middleware) => {
 
 export const StoreContext = React.createContext({
   state: {},
-  dispatch: () => {}
+  dispatch: () => {},
 });
 
 export const StoreProvider = ({ store, children }) => {
   const stateProps = useStore(
     store.reducers,
     store.initialState,
-    store.middleware
+    store.middleware,
   );
-  const ui = typeof children === "function" ? children(stateProps) : children;
+  const ui = typeof children === 'function' ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
@@ -50,18 +55,28 @@ export const useStoreContext = () => {
   return props;
 };
 
-export const createStore = (reducers, initialState, middleware) => {
+const getInitialState = (reducers, initialState) => {
+  const stateFromReducers = Object.keys(reducers).reduce((acc, key) => {
+    const reducer = reducers[key];
+    return {
+      ...acc,
+      [key]: reducer(undefined, {}),
+    };
+  }, {});
+
+  return lodashMerge(stateFromReducers, initialState);
+};
+
+export const createStore = (reducers, initialState = {}, middleware) => {
   return {
     reducers: reducers(),
-    initialState,
-    middleware
+    initialState: getInitialState(reducers(), initialState),
+    middleware,
   };
 };
 
 export const combineReducers = reducers => {
-  const reducerKeys = Object.keys(reducers);
   return () => {
-    console.log(reducerKeys);
     // do the combination here
     return reducers;
   };

@@ -1,11 +1,17 @@
+import { TOGGLE_FILTER } from './actions';
+
 const initialState = {
-  visibilityFilter: "SHOW_ALL"
+  visibilityFilter: true,
 };
 
 export default function filterReducer(state = initialState, action) {
   switch (action.type) {
-    case "some":
-      return state;
+    case TOGGLE_FILTER:
+      console.log(state);
+      return {
+        ...state,
+        visibilityFilter: !state.visibilityFilter,
+      };
     default:
       return state;
   }
