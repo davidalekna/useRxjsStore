@@ -6,7 +6,7 @@ const action$ = new Subject();
 
 const useStore = (reducers, initialState = {}, middleware) => {
   const [state, update] = useState(initialState);
-
+  console.log(initialState);
   const dispatch = next => action$.next(next);
 
   useEffect(() => {
@@ -36,7 +36,11 @@ export const StoreContext = React.createContext({
 });
 
 export const StoreProvider = ({ store, children }) => {
-  const stateProps = useStore(store.reducers, store.initialState);
+  const stateProps = useStore(
+    store.reducers,
+    store.initialState,
+    store.middleware
+  );
   const ui = typeof children === "function" ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
@@ -48,23 +52,19 @@ export const useStoreContext = () => {
 
 export const createStore = (reducers, initialState, middleware) => {
   return {
-    reducers,
+    reducers: reducers(),
     initialState,
     middleware
   };
 };
 
 export const combineReducers = reducers => {
-  return reducers;
-  // return Object.keys(reducers).reduce((acc, key) => {
-  //   return {
-  //     ...acc,
-  //     [key]: {
-  //       action$: new Subject(),
-  //       reducer: reducers[key]
-  //     }
-  //   };
-  // }, {});
+  const reducerKeys = Object.keys(reducers);
+  return () => {
+    console.log(reducerKeys);
+    // do the combination here
+    return reducers;
+  };
 };
 
 export default useStore;
