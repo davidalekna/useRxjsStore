@@ -35,8 +35,8 @@ export const StoreContext = React.createContext({
   dispatch: () => {}
 });
 
-export const StoreProvider = ({ reducers, initialState, children }) => {
-  const stateProps = useStore(reducers, initialState);
+export const StoreProvider = ({ store, children }) => {
+  const stateProps = useStore(store.reducers, store.initialState);
   const ui = typeof children === "function" ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
@@ -44,6 +44,14 @@ export const StoreProvider = ({ reducers, initialState, children }) => {
 export const useStoreContext = () => {
   const props = React.useContext(StoreContext);
   return props;
+};
+
+export const createStore = (reducers, initialState, middleware) => {
+  return {
+    reducers,
+    initialState,
+    middleware
+  };
 };
 
 export const combineReducers = reducers => {

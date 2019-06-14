@@ -1,9 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { StoreProvider } from "./useStore";
-import reducers from "./store";
-
 import { addTodo } from "./store/todos/actions";
+import storeConfig from "./store";
 
 import "./styles.css";
 
@@ -23,7 +22,7 @@ const initialState = {
 
 function App() {
   return (
-    <StoreProvider reducers={reducers} initialState={initialState}>
+    <StoreProvider store={storeConfig(initialState)}>
       {({ state, dispatch }) => (
         <div className="App">
           <h1>Hello CodeSandbox</h1>
