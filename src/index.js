@@ -8,19 +8,21 @@ import storeConfig from './store';
 import './styles.css';
 
 function Filters() {
-  const { state } = useStoreContext();
-  return state.filter.visibilityFilter ? 'toggled on' : 'toggled off';
+  const { filter } = useStoreContext('filter');
+  console.log('rerendering filter');
+  return filter.visibilityFilter ? 'toggled on' : 'toggled off';
 }
 
 function Todos() {
-  const { state } = useStoreContext();
-  return state.todos.map((todo, key) => <div key={key}>{todo.text}</div>);
+  const { todos } = useStoreContext('todos');
+  console.log('rerendering todos');
+  return todos.map((todo, key) => <div key={key}>{todo.text}</div>);
 }
 
 function App() {
   return (
     <StoreProvider store={storeConfig()}>
-      {({ state, dispatch }) => {
+      {({ dispatch }) => {
         return (
           <div className="App">
             <h1>Hello CodeSandbox</h1>

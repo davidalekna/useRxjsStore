@@ -10,21 +10,23 @@ const useStore = (reducers, initialState = {}, middleware) => {
 
   const dispatch = next => action$.next(next);
 
-  /* eslint ignore */
   useEffect(() => {
     const s = merge(action$)
       .pipe(
         scan((prevState, action) => {
-          // NOTE: for loop doesnt work here, only the first item is taken out
-          const reducerKeys = Object.keys(reducers);
-          for (const key of reducerKeys) {
+          // get all keys of state
+          const stateKeys = Object.keys(reducers);
+          const newState = {};
+          // loop over all state keys
+          for (const key of stateKeys) {
+            // extract reducer for per state key
             const reducer = reducers[key];
-            console.log(key);
-            return {
-              ...prevState,
+            Object.assign(newState, {
               [key]: reducer(prevState[key], action),
-            };
+            });
           }
+          // merge prevState with current state
+          return { ...prevState, ...newState };
         }, initialState),
       )
       .subscribe(update);
@@ -50,9 +52,10 @@ export const StoreProvider = ({ store, children }) => {
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
-export const useStoreContext = () => {
-  const props = React.useContext(StoreContext);
-  return props;
+export const useStoreContext = stateKey => {
+  const { state, dispatch } = React.useContext(StoreContext);
+  const newState = React.useMemo(() => state[stateKey], [state[stateKey]]);
+  return { [stateKey]: newState, dispatch };
 };
 
 const getInitialState = (reducers, initialState) => {
