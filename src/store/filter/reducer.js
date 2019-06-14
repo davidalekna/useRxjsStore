@@ -7,7 +7,6 @@ const initialState = {
 export default function filterReducer(state = initialState, action) {
   switch (action.type) {
     case TOGGLE_FILTER:
-      console.log(state);
       return {
         ...state,
         visibilityFilter: !state.visibilityFilter,

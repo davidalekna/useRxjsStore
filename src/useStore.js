@@ -53,6 +53,7 @@ export const StoreProvider = ({ store, children }) => {
 };
 
 export const useStoreContext = stateKey => {
+  // TODO: optimization
   const { state, dispatch } = React.useContext(StoreContext);
   const newState = React.useMemo(() => state[stateKey], [state[stateKey]]);
   return { [stateKey]: newState, dispatch };
