@@ -48,15 +48,17 @@ export const StoreProvider = ({ store, children }) => {
     store.initialState,
     store.middleware,
   );
+  React.useEffect(() => {}, []);
   const ui = typeof children === 'function' ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
-export const useStoreContext = stateKey => {
+export const useSelector = stateKey => {
   // TODO: optimization
   const { state, dispatch } = React.useContext(StoreContext);
-  const newState = React.useMemo(() => state[stateKey], [state[stateKey]]);
-  return { [stateKey]: newState, dispatch };
+  const selectedState = state[stateKey];
+  const memoState = React.useMemo(() => selectedState, [selectedState]);
+  return { [stateKey]: memoState, dispatch };
 };
 
 const getInitialState = (reducers, initialState) => {
