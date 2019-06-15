@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
-import { scan } from 'rxjs/operators';
+import { scan, filter } from 'rxjs/operators';
 import { merge } from 'lodash';
 import combineEpics from './combineEpics';
 
@@ -81,6 +81,10 @@ export const createStore = (reducers, initialState = {}, middleware = []) => {
     initialState: getInitialState(reducers, initialState),
     middleware,
   };
+};
+
+export const ofType = actionType => {
+  return filter(({ type }) => type === actionType);
 };
 
 export default useStore;
