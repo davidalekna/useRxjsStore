@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
-import { scan, filter } from 'rxjs/operators';
+import { scan, filter, distinctUntilChanged } from 'rxjs/operators';
 import { merge } from 'lodash';
 import combineEpics from './combineEpics';
 
@@ -31,6 +31,7 @@ const useStore = (reducers, initialState = {}, epics = []) => {
           // merge prevState with current state
           return { ...prevState, ...newState };
         }, initialState),
+        distinctUntilChanged(),
       )
       .subscribe(update);
 
@@ -56,7 +57,7 @@ export const StoreProvider = ({ store, children }) => {
 };
 
 export const useSelector = stateKey => {
-  // TODO: optimization
+  // ERROR: needs optimization
   const { state, dispatch } = React.useContext(StoreContext);
   const selectedState = state[stateKey];
   const memoState = React.useMemo(() => selectedState, [selectedState]);
