@@ -1,11 +1,11 @@
 import { merge } from 'rxjs';
 
 export default function combineEpics(...epics) {
-  return (...streams) => {
+  return stream => {
     return merge(
-      streams[0],
+      stream,
       ...epics.map(epic => {
-        const output$ = epic(...streams);
+        const output$ = epic(stream);
         if (!output$) {
           throw new TypeError(
             `combineEpics: one of the provided Epics "${epic.name ||

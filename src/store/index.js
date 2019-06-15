@@ -12,9 +12,7 @@ export default function configureStore(initialState) {
     filter: filterReducer,
   };
 
-  // NOTE: something is wrong when passing down epics
-  // adds todos twice and skips filters
   const epics = [todosEpic, filterEpic];
 
-  return createStore(reducers, initialState || {});
+  return createStore(reducers, initialState || {}, epics);
 }

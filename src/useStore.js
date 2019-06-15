@@ -16,6 +16,7 @@ const useStore = (reducers, initialState = {}, epics = []) => {
   useEffect(() => {
     const s = combinedEpics(action$)
       .pipe(
+        distinctUntilChanged(),
         scan((prevState, action) => {
           // get all keys of state
           const stateKeys = Object.keys(reducers);
@@ -31,7 +32,6 @@ const useStore = (reducers, initialState = {}, epics = []) => {
           // merge prevState with current state
           return { ...prevState, ...newState };
         }, initialState),
-        distinctUntilChanged(),
       )
       .subscribe(update);
 
