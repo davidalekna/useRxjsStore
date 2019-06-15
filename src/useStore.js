@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Subject, merge } from 'rxjs';
+import { Subject } from 'rxjs';
 import { scan } from 'rxjs/operators';
-import { merge as lodashMerge } from 'lodash';
+import { merge } from 'lodash';
+import combineEpics from './combineEpics';
 
 const action$ = new Subject();
 
-const useStore = (reducers, initialState = {}, middleware) => {
+const useStore = (reducers, initialState = {}, epics = []) => {
   const [state, update] = useState(initialState);
+
+  const combinedEpics = combineEpics(...epics);
 
   const dispatch = next => action$.next(next);
 
   useEffect(() => {
-    const s = merge(action$)
+    const s = combinedEpics(action$)
       .pipe(
         scan((prevState, action) => {
           // get all keys of state
@@ -48,7 +51,6 @@ export const StoreProvider = ({ store, children }) => {
     store.initialState,
     store.middleware,
   );
-  React.useEffect(() => {}, []);
   const ui = typeof children === 'function' ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
@@ -70,21 +72,14 @@ const getInitialState = (reducers, initialState) => {
     };
   }, {});
 
-  return lodashMerge(stateFromReducers, initialState);
+  return merge(stateFromReducers, initialState);
 };
 
-export const createStore = (reducers, initialState = {}, middleware) => {
+export const createStore = (reducers, initialState = {}, middleware = []) => {
   return {
-    reducers: reducers(),
-    initialState: getInitialState(reducers(), initialState),
+    reducers,
+    initialState: getInitialState(reducers, initialState),
     middleware,
-  };
-};
-
-export const combineReducers = reducers => {
-  return () => {
-    // do the combination here
-    return reducers;
   };
 };
 

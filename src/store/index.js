@@ -1,14 +1,12 @@
-import { combineReducers, createStore } from "../useStore";
-import todosReducer from "./todos/reducer";
-import filterReducer from "./filter/reducer";
+import { createStore } from '../useStore';
+import todosReducer from './todos/reducer';
+import filterReducer from './filter/reducer';
 
 export default function configureStore(initialState) {
-  const reducers = combineReducers({
+  const reducers = {
     todos: todosReducer,
-    filter: filterReducer
-  });
+    filter: filterReducer,
+  };
 
-  const store = createStore(reducers, initialState || {});
-
-  return store;
+  return createStore(reducers, initialState || {});
 }

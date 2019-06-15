@@ -47,7 +47,10 @@ function Root({ dispatch }) {
 function App() {
   return (
     <StoreProvider store={storeConfig()}>
-      {props => <Root {...props} />}
+      {props => {
+        console.log('root');
+        return <Root {...props} />;
+      }}
     </StoreProvider>
   );
 }
