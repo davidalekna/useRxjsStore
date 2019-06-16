@@ -14,14 +14,20 @@ const useStore = (
 ) => {
   const [state, update] = useState(initialState);
 
-  const combinedEpics = combineEpics(...epics);
-
   const dispatch = (next: Action) => action$.next(next);
 
   useEffect(() => {
+    // ERROR: missing peace is that unspecified epics are being missedout
+    // need to somehow merge master action$ with other epics
+
+    // NOTE: find a way to share same action$ stream for the epics
+    const combinedEpics = combineEpics(
+      (unfilteredActions$: any) => unfilteredActions$,
+      ...epics,
+    );
     const s = combinedEpics(action$)
       .pipe(
-        tap(a => console.log('b-scan', a)),
+        tap(b => console.log('b-scan', b)),
         scan<Action, State>((prevState, action) => {
           // get all keys of state
           const stateKeys = Object.keys(reducers);
@@ -43,7 +49,7 @@ const useStore = (
     return () => {
       s.unsubscribe();
     };
-  }, [action$]);
+  }, [reducers, initialState, epics]);
 
   return { state, dispatch };
 };

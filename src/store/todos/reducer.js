@@ -16,6 +16,7 @@ export default function todosReducer(state = initialState, action) {
     case ADD_TODO:
       return [...state, action.payload];
     case TOGGLE_TODO:
+      console.log('toggling');
       return state.map((todo, index) => {
         if (index === action.payload) {
           return Object.assign({}, todo, {

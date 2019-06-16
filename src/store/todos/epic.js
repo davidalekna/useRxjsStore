@@ -5,6 +5,6 @@ import { filter } from 'rxjs/operators';
 export default function todosEpic(action$) {
   return action$.pipe(
     ofType(ADD_TODO),
-    filter(action => action.payload.text.trim('')),
+    filter(action => action.payload.text.trim()),
   );
 }
