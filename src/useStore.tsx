@@ -1,23 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import { Subject } from 'rxjs';
 import { scan, filter, distinctUntilChanged } from 'rxjs/operators';
 import { merge } from 'lodash';
 import combineEpics from './combineEpics';
+import { Reducers, State, Store, Epics } from './types';
 
 const action$ = new Subject();
 
-const useStore = (reducers, initialState = {}, epics = []) => {
+const useStore = (
+  reducers: Reducers,
+  initialState: State = {},
+  epics: Epics = [],
+) => {
   const [state, update] = useState(initialState);
 
   const combinedEpics = combineEpics(...epics);
 
-  const dispatch = next => action$.next(next);
+  const dispatch = (next: object) => action$.next(next);
 
   useEffect(() => {
     const s = combinedEpics(action$)
       .pipe(
         distinctUntilChanged(),
-        scan((prevState, action) => {
+        scan<State>((prevState, action) => {
           // get all keys of state
           const stateKeys = Object.keys(reducers);
           const newState = {};
@@ -41,12 +46,21 @@ const useStore = (reducers, initialState = {}, epics = []) => {
   return { state, dispatch };
 };
 
-export const StoreContext = React.createContext({
+export const StoreContext = React.createContext<{
+  state: State;
+  dispatch: Function;
+}>({
   state: {},
   dispatch: () => {},
 });
 
-export const StoreProvider = ({ store, children }) => {
+export const StoreProvider = ({
+  store,
+  children,
+}: {
+  store: Store;
+  children: ReactNode;
+}) => {
   const stateProps = useStore(
     store.reducers,
     store.initialState,
@@ -56,7 +70,7 @@ export const StoreProvider = ({ store, children }) => {
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
-export const useSelector = stateKey => {
+export const useSelector = (stateKey: string) => {
   // ERROR: needs optimization
   const { state, dispatch } = React.useContext(StoreContext);
   const selectedState = state[stateKey];
@@ -64,7 +78,7 @@ export const useSelector = stateKey => {
   return { [stateKey]: memoState, dispatch };
 };
 
-const getInitialState = (reducers, initialState) => {
+const getInitialState = (reducers: Reducers, initialState: State) => {
   const stateFromReducers = Object.keys(reducers).reduce((acc, key) => {
     const reducer = reducers[key];
     return {
@@ -76,7 +90,11 @@ const getInitialState = (reducers, initialState) => {
   return merge(stateFromReducers, initialState);
 };
 
-export const createStore = (reducers, initialState = {}, middleware = []) => {
+export const createStore = (
+  reducers: Reducers,
+  initialState: State = {},
+  middleware: Epics = [],
+) => {
   return {
     reducers,
     initialState: getInitialState(reducers, initialState),
@@ -84,7 +102,7 @@ export const createStore = (reducers, initialState = {}, middleware = []) => {
   };
 };
 
-export const ofType = actionType => {
+export const ofType = (actionType: string) => {
   return filter(({ type }) => type === actionType);
 };
 
