@@ -6,10 +6,15 @@ export type State = {
   [key: string]: any;
 };
 
+export type Action = {
+  type: string;
+  payload?: unknown;
+};
+
 export type Epics = Function[];
 
 export type Store = {
   reducers: Reducers;
   initialState: State;
-  middleware?: Epics;
+  epics?: Epics;
 };

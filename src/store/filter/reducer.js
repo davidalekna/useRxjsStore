@@ -9,7 +9,7 @@ export default function filterReducer(state = initialState, action) {
     case TOGGLE_FILTER:
       return {
         ...state,
-        visibilityFilter: !state.visibilityFilter,
+        visibilityFilter: action.payload,
       };
     default:
       return state;

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Subject } from 'rxjs';
-import { scan, filter, distinctUntilChanged } from 'rxjs/operators';
+import { scan, filter, distinctUntilChanged, tap } from 'rxjs/operators';
 import { merge } from 'lodash';
 import combineEpics from './combineEpics';
-import { Reducers, State, Store, Epics } from './types';
+import { Reducers, State, Store, Epics, Action } from './types';
 
 const action$ = new Subject();
 
@@ -16,13 +16,13 @@ const useStore = (
 
   const combinedEpics = combineEpics(...epics);
 
-  const dispatch = (next: object) => action$.next(next);
+  const dispatch = (next: Action) => action$.next(next);
 
   useEffect(() => {
     const s = combinedEpics(action$)
       .pipe(
         distinctUntilChanged(),
-        scan<State>((prevState, action) => {
+        scan<Action, State>((prevState, action) => {
           // get all keys of state
           const stateKeys = Object.keys(reducers);
           const newState = {};
@@ -61,11 +61,7 @@ export const StoreProvider = ({
   store: Store;
   children: ReactNode;
 }) => {
-  const stateProps = useStore(
-    store.reducers,
-    store.initialState,
-    store.middleware,
-  );
+  const stateProps = useStore(store.reducers, store.initialState, store.epics);
   const ui = typeof children === 'function' ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
@@ -93,12 +89,12 @@ const getInitialState = (reducers: Reducers, initialState: State) => {
 export const createStore = (
   reducers: Reducers,
   initialState: State = {},
-  middleware: Epics = [],
+  epics: Epics = [],
 ) => {
   return {
     reducers,
     initialState: getInitialState(reducers, initialState),
-    middleware,
+    epics,
   };
 };
 

@@ -9,7 +9,7 @@ import './styles.css';
 
 function Filters() {
   const { filter, dispatch } = useSelector('filter');
-  console.log('filter');
+  // console.log('filter');
   return (
     <div
       style={{
@@ -18,7 +18,9 @@ function Filters() {
         padding: 20,
       }}
     >
-      <button onClick={() => dispatch(toggleFilter())}>toggle filter</button>
+      <button onClick={() => dispatch(toggleFilter(!filter.visibilityFilter))}>
+        toggle filter
+      </button>
       <div>{filter.visibilityFilter ? 'toggled on' : 'toggled off'}</div>
     </div>
   );
@@ -26,7 +28,7 @@ function Filters() {
 
 function Todos() {
   const { todos, dispatch } = useSelector('todos');
-  console.log('todos');
+  // console.log('todos');
   return (
     <div>
       <button
