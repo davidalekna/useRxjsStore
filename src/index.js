@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { StoreProvider, useSelector } from './useStore';
-import { addTodo } from './store/todos/actions';
+import { addTodo, toggleTodo } from './store/todos/actions';
 import { toggleFilter } from './store/filter/actions';
 import storeConfig from './store';
 
@@ -27,24 +27,38 @@ function Filters() {
 }
 
 function Todos() {
+  const [value, setInput] = useState('');
   const { todos, dispatch } = useSelector('todos');
   // console.log('todos');
   return (
     <div>
-      <button
-        onClick={() =>
-          dispatch(
-            addTodo({
-              text: 'Checking stuff',
-              completed: false,
-            }),
-          )
-        }
+      <form
+        onSubmit={evt => {
+          evt.preventDefault();
+          dispatch(addTodo({ text: value, completed: false }));
+          setInput('');
+        }}
       >
-        add todo
-      </button>
-      {todos.map((todo, key) => (
-        <div key={key}>{todo.text}</div>
+        <input
+          type="text"
+          value={value}
+          onChange={evt => {
+            setInput(evt.target.value);
+          }}
+        />
+        <button type="submit">add todo</button>
+      </form>
+      {todos.map((todo, index) => (
+        <div
+          key={index}
+          style={{
+            textDecoration: todo.completed ? 'line-through' : null,
+            userSelect: 'none',
+          }}
+          onClick={() => dispatch(toggleTodo(index))}
+        >
+          {todo.text}
+        </div>
       ))}
     </div>
   );

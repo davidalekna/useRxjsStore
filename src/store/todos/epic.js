@@ -1,7 +1,10 @@
-import { tap } from 'rxjs/operators';
 import { ofType } from '../../useStore';
 import { ADD_TODO } from './actions';
+import { filter } from 'rxjs/operators';
 
-export default function todosEpic($actions) {
-  return $actions.pipe(ofType(ADD_TODO));
+export default function todosEpic(action$) {
+  return action$.pipe(
+    ofType(ADD_TODO),
+    filter(action => action.payload.text.trim('')),
+  );
 }

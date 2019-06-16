@@ -1,9 +1,9 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Subject } from 'rxjs';
-import { scan, filter, distinctUntilChanged, tap } from 'rxjs/operators';
-import { merge } from 'lodash';
-import combineEpics from './combineEpics';
+import { scan, filter, tap } from 'rxjs/operators';
+import { merge as lodashMerge } from 'lodash';
 import { Reducers, State, Store, Epics, Action } from './types';
+import combineEpics from './combineEpics';
 
 const action$ = new Subject();
 
@@ -21,7 +21,7 @@ const useStore = (
   useEffect(() => {
     const s = combinedEpics(action$)
       .pipe(
-        distinctUntilChanged(),
+        tap(a => console.log('b-scan', a)),
         scan<Action, State>((prevState, action) => {
           // get all keys of state
           const stateKeys = Object.keys(reducers);
@@ -40,7 +40,9 @@ const useStore = (
       )
       .subscribe(update);
 
-    return () => s.unsubscribe();
+    return () => {
+      s.unsubscribe();
+    };
   }, [action$]);
 
   return { state, dispatch };
@@ -83,7 +85,7 @@ const getInitialState = (reducers: Reducers, initialState: State) => {
     };
   }, {});
 
-  return merge(stateFromReducers, initialState);
+  return lodashMerge(stateFromReducers, initialState);
 };
 
 export const createStore = (
@@ -99,7 +101,7 @@ export const createStore = (
 };
 
 export const ofType = (actionType: string) => {
-  return filter(({ type }) => type === actionType);
+  return filter(({ type }: any) => type === actionType);
 };
 
 export default useStore;

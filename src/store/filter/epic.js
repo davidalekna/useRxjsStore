@@ -1,10 +1,10 @@
-import { tap, debounceTime } from 'rxjs/operators';
+import { delay } from 'rxjs/operators';
 import { ofType } from '../../useStore';
 import { TOGGLE_FILTER } from './actions';
 
-export default function todosEpic($actions) {
-  return $actions.pipe(
+export default function todosEpic(action$) {
+  return action$.pipe(
     ofType(TOGGLE_FILTER),
-    debounceTime(1000),
+    delay(1000),
   );
 }

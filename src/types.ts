@@ -8,7 +8,7 @@ export type State = {
 
 export type Action = {
   type: string;
-  payload?: unknown;
+  payload?: any;
 };
 
 export type Epics = Function[];

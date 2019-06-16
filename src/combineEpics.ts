@@ -1,11 +1,13 @@
 import { merge } from 'rxjs';
 
-export default function combineEpics(...epics) {
-  return stream => {
+/**
+  Merges all epics into a single one.
+ */
+export default function combineEpics(...epics: Function[]): any {
+  return (...args: Function[]) => {
     return merge(
-      stream,
-      ...epics.map(epic => {
-        const output$ = epic(stream);
+      ...epics.map((epic: Function) => {
+        const output$ = epic(...args);
         if (!output$) {
           throw new TypeError(
             `combineEpics: one of the provided Epics "${epic.name ||
