@@ -1,6 +1,6 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Subject } from 'rxjs';
-import { scan, filter, tap, map } from 'rxjs/operators';
+import { scan, filter, tap } from 'rxjs/operators';
 import { merge as lodashMerge } from 'lodash';
 import { Reducers, State, Store, Epics, Action } from './types';
 import combineEpics from './combineEpics';
@@ -17,14 +17,7 @@ export const useStore = (
   const dispatch = (next: Action) => action$.next(next);
 
   useEffect(() => {
-    // ERROR: missing peace is that unspecified epics are being missedout
-    // need to somehow merge master action$ with other epics
-
-    // NOTE: find a way to share same action$ stream for the epics
-    const combinedEpics = combineEpics(
-      (unfilteredActions$: any) => unfilteredActions$,
-      ...epics,
-    );
+    const combinedEpics = combineEpics(epics);
     const s = combinedEpics(action$)
       .pipe(
         tap(b => console.log('b-scan', b)),

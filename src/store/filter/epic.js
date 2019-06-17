@@ -1,10 +1,12 @@
 import { delay } from 'rxjs/operators';
-import { ofType } from '../../useStore';
 import { TOGGLE_FILTER } from './actions';
 
-export default function todosEpic(action$) {
-  return action$.pipe(
-    ofType(TOGGLE_FILTER),
-    delay(1000),
-  );
-}
+export default {
+  actions: [TOGGLE_FILTER],
+  streams: [
+    {
+      type: TOGGLE_FILTER,
+      stream: action$ => action$.pipe(delay(1000)),
+    },
+  ],
+};

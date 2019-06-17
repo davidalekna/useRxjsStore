@@ -1,20 +1,29 @@
 import { merge } from 'rxjs';
+import { Epics, Epic, Stream } from './types';
+import { ofType } from './useStore';
 
-/**
-  Merges all epics into a single one.
- */
-export default function combineEpics(...epics: Function[]): any {
-  return (...args: Function[]) => {
+export default function combineEpics(epics: Epics): any {
+  const allActions = epics.reduce(
+    (acc: string[], epic: Epic) => [...acc, ...epic.actions],
+    [],
+  );
+  const usedActions = epics.reduce((acc: string[], epic: Epic) => {
+    return [...acc, ...epic.streams.map(s => s.type)];
+  }, []);
+  const unusedActions = allActions
+    .map(a => (!usedActions.includes(a) ? a : null))
+    .filter(Boolean);
+  const declaredStreams = epics.reduce((acc: Stream[], val: Epic) => {
+    return [...acc, ...val.streams];
+  }, []);
+
+  return (stream$: any) => {
     return merge(
-      ...epics.map((epic: Function) => {
-        const output$ = epic(...args);
-        if (!output$) {
-          throw new TypeError(
-            `combineEpics: one of the provided Epics "${epic.name ||
-              '<anonymous>'}" does not return a stream. Double check you're not missing a return statement!`,
-          );
-        }
-        return output$;
+      ...unusedActions.map((type: any) => {
+        return stream$.pipe(ofType(type));
+      }),
+      ...declaredStreams.map(({ type, stream }) => {
+        return stream(stream$.pipe(ofType(type)));
       }),
     );
   };

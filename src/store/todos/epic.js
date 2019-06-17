@@ -1,10 +1,13 @@
-import { ofType } from '../../useStore';
-import { ADD_TODO } from './actions';
 import { filter } from 'rxjs/operators';
+import { ADD_TODO, TOGGLE_TODO } from './actions';
 
-export default function todosEpic(action$) {
-  return action$.pipe(
-    ofType(ADD_TODO),
-    filter(action => action.payload.text.trim()),
-  );
-}
+export default {
+  actions: [ADD_TODO, TOGGLE_TODO],
+  streams: [
+    {
+      type: ADD_TODO,
+      stream: action$ =>
+        action$.pipe(filter(action => action.payload.text.trim())),
+    },
+  ],
+};
