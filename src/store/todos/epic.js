@@ -1,4 +1,4 @@
-import { filter } from 'rxjs/operators';
+import { filter, delay } from 'rxjs/operators';
 import { ADD_TODO, TOGGLE_TODO } from './actions';
 
 export default {
@@ -7,7 +7,10 @@ export default {
     {
       type: ADD_TODO,
       stream: action$ =>
-        action$.pipe(filter(action => action.payload.text.trim())),
+        action$.pipe(
+          delay(250),
+          filter(action => action.payload.text.trim()),
+        ),
     },
   ],
 };

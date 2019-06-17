@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode, useMemo } from 'react';
 import { Subject } from 'rxjs';
 import { scan, filter } from 'rxjs/operators';
 import { merge as lodashMerge } from 'lodash';
@@ -60,11 +60,10 @@ const StoreProvider = ({
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
-export const useSelector = (stateKey: string) => {
+export const useSelector = (key: string) => {
   // ERROR: needs optimization
   const state = React.useContext(StoreContext);
-  const selectedState = state[stateKey];
-  return selectedState;
+  return useMemo(() => state[key], [state[key]]);
 };
 
 const getInitialState = (reducers: Reducers, initialState: State) => {
