@@ -63,7 +63,8 @@ const StoreProvider = ({
 export const useSelector = (key: string) => {
   // ERROR: needs optimization
   const state = React.useContext(StoreContext);
-  return useMemo(() => state[key], [state[key]]);
+  const newState = state[key];
+  return useMemo(() => state[key], [newState, key]);
 };
 
 const getInitialState = (reducers: Reducers, initialState: State) => {
