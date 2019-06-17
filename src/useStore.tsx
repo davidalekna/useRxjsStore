@@ -1,11 +1,13 @@
-import React, { useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode, useMemo } from 'react';
 import { Subject } from 'rxjs';
-import { scan, filter, tap, distinctUntilChanged } from 'rxjs/operators';
+import { scan, filter } from 'rxjs/operators';
 import { merge as lodashMerge } from 'lodash';
 import { Reducers, State, Store, Epics, Action } from './types';
 import combineEpics from './combineEpics';
 
 const action$ = new Subject();
+
+export const dispatch = (next: Action) => action$.next(next);
 
 export const useStore = (
   reducers: Reducers,
@@ -14,13 +16,10 @@ export const useStore = (
 ) => {
   const [state, update] = useState(initialState);
 
-  const dispatch = (next: Action) => action$.next(next);
-
   useEffect(() => {
     const combinedEpics = combineEpics(epics);
     const s = combinedEpics(action$)
       .pipe(
-        tap(b => console.log('b-scan', b)),
         scan<Action, State>((prevState, action) => {
           // get all keys of state
           const stateKeys = Object.keys(reducers);
@@ -44,16 +43,10 @@ export const useStore = (
     };
   }, [reducers, initialState, epics]);
 
-  return { state, dispatch };
+  return state;
 };
 
-export const StoreContext = React.createContext<{
-  state: State;
-  dispatch: Function;
-}>({
-  state: {},
-  dispatch: () => {},
-});
+export const StoreContext = React.createContext<State>({});
 
 const StoreProvider = ({
   store,
@@ -67,12 +60,11 @@ const StoreProvider = ({
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
-export const useSelector = (stateKey: string) => {
+export const useSelector = (key: string) => {
   // ERROR: needs optimization
-  const { state, dispatch } = React.useContext(StoreContext);
-  const selectedState = state[stateKey];
-  const memoState = React.useMemo(() => selectedState, [selectedState]);
-  return { [stateKey]: memoState, dispatch };
+  const state = React.useContext(StoreContext);
+  const newState = state[key];
+  return useMemo(() => state[key], [newState, key]);
 };
 
 const getInitialState = (reducers: Reducers, initialState: State) => {

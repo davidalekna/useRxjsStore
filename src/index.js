@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import StoreProvider, { useSelector } from './useStore';
+import StoreProvider, { useSelector, dispatch } from './useStore';
 import { addTodo, toggleTodo } from './store/todos/actions';
 import { toggleFilter } from './store/filter/actions';
 import storeConfig from './store';
@@ -8,8 +8,8 @@ import storeConfig from './store';
 import './styles.css';
 
 function Filters() {
-  const { filter, dispatch } = useSelector('filter');
-  // console.log('filter');
+  const filter = useSelector('filter');
+  console.log('filter');
   return (
     <div
       style={{
@@ -28,8 +28,8 @@ function Filters() {
 
 function Todos() {
   const [value, setInput] = useState('');
-  const { todos, dispatch } = useSelector('todos');
-  // console.log('todos');
+  const todos = useSelector('todos');
+  console.log('todos');
   return (
     <div>
       <form
@@ -65,7 +65,7 @@ function Todos() {
 }
 
 function Root() {
-  console.log('store');
+  console.log('root');
   return (
     <div className="App">
       <h1>Hello CodeSandbox</h1>
@@ -77,6 +77,7 @@ function Root() {
 }
 
 function App() {
+  console.log('app');
   return (
     <StoreProvider store={storeConfig()}>
       <Root />
