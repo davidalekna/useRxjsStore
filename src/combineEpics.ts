@@ -1,8 +1,10 @@
 import { merge } from 'rxjs';
-import { Epics, Epic, Stream } from './types';
+import { Epics, Epic, Stream, Action } from './types';
 import { ofType } from './useStore';
+import { filter } from 'rxjs/operators';
 
 export default function combineEpics(epics: Epics): any {
+  // extract available actions and actions that have streams
   const allActions = epics.reduce(
     (acc: string[], epic: Epic) => [...acc, ...epic.actions],
     [],
@@ -19,9 +21,9 @@ export default function combineEpics(epics: Epics): any {
 
   return (stream$: any) => {
     return merge(
-      ...unusedActions.map((type: any) => {
-        return stream$.pipe(ofType(type));
-      }),
+      // unstreamed actions
+      stream$.pipe(filter(({ type }: Action) => unusedActions.includes(type))),
+      // streamed actions
       ...declaredStreams.map(({ type, stream }) => {
         return stream(stream$.pipe(ofType(type)));
       }),
