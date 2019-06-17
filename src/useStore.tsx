@@ -1,13 +1,13 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Subject } from 'rxjs';
-import { scan, filter, tap } from 'rxjs/operators';
+import { scan, filter, tap, map } from 'rxjs/operators';
 import { merge as lodashMerge } from 'lodash';
 import { Reducers, State, Store, Epics, Action } from './types';
 import combineEpics from './combineEpics';
 
 const action$ = new Subject();
 
-const useStore = (
+export const useStore = (
   reducers: Reducers,
   initialState: State = {},
   epics: Epics = [],
@@ -62,7 +62,7 @@ export const StoreContext = React.createContext<{
   dispatch: () => {},
 });
 
-export const StoreProvider = ({
+const StoreProvider = ({
   store,
   children,
 }: {
@@ -110,4 +110,4 @@ export const ofType = (actionType: string) => {
   return filter(({ type }: any) => type === actionType);
 };
 
-export default useStore;
+export default StoreProvider;

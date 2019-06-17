@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { StoreProvider, useSelector } from './useStore';
+import StoreProvider, { useSelector } from './useStore';
 import { addTodo, toggleTodo } from './store/todos/actions';
 import { toggleFilter } from './store/filter/actions';
 import storeConfig from './store';
