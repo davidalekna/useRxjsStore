@@ -7,8 +7,8 @@ import storeConfig from './store';
 
 import './styles.css';
 
-function Filters() {
-  const filter = useSelector('filter');
+const Filters = () => {
+  const filter = useSelector(state => state.filter);
   console.log('filter');
   return (
     <div
@@ -24,11 +24,11 @@ function Filters() {
       <div>{filter.visibilityFilter ? 'toggled on' : 'toggled off'}</div>
     </div>
   );
-}
+};
 
-function Todos() {
+const Todos = () => {
   const [value, setInput] = useState('');
-  const todos = useSelector('todos');
+  const todos = useSelector(state => state.todos);
   console.log('todos');
   return (
     <div>
@@ -62,7 +62,7 @@ function Todos() {
       ))}
     </div>
   );
-}
+};
 
 function Root() {
   console.log('root');

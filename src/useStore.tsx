@@ -43,7 +43,11 @@ export const useStore = (
     };
   }, [reducers, initialState, epics]);
 
-  return state;
+  function selectState(callback: Function) {
+    return callback(state);
+  }
+
+  return { state, selectState };
 };
 
 export const StoreContext = React.createContext<State>({});
@@ -60,11 +64,10 @@ const StoreProvider = ({
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
 
-export const useSelector = (key: string) => {
-  // ERROR: needs optimization
-  const state = React.useContext(StoreContext);
-  const newState = state[key];
-  return useMemo(() => state[key], [newState, key]);
+export const useSelector = (callback: Function) => {
+  const { selectState } = React.useContext(StoreContext);
+  const state = selectState(callback);
+  return useMemo(() => state, [state]);
 };
 
 const getInitialState = (reducers: Reducers, initialState: State) => {
