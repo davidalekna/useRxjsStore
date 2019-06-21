@@ -9,7 +9,7 @@ import './styles.css';
 
 const Filters = () => {
   const filter = useSelector(state => state.filter);
-  console.log('filter');
+  // console.log('filter');
   return (
     <div
       style={{
@@ -29,7 +29,7 @@ const Filters = () => {
 const Todos = () => {
   const [value, setInput] = useState('');
   const todos = useSelector(state => state.todos);
-  console.log('todos');
+  // console.log('todos');
   return (
     <div>
       <form

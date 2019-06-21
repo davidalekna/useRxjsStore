@@ -14,5 +14,5 @@ export default function configureStore(initialState) {
 
   const epics = [todosEpic, filterEpic];
 
-  return createStore(reducers, initialState || {}, epics);
+  return createStore(reducers, epics, initialState || {});
 }

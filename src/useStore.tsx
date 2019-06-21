@@ -10,17 +10,26 @@ const action$ = new Subject();
 export const dispatch = (next: Action) => action$.next(next);
 
 export const useStore = (
-  reducers: Reducers,
-  initialState: State = {},
+  reducers: Reducers | Function,
   epics: Epics = [],
+  initialState: State = {},
 ) => {
   const [state, update] = useState(initialState);
+
+  // NOTE: full stream must be provided to all epics, they might
+  // use more than one filtered action.
 
   useEffect(() => {
     const combinedEpics = combineEpics(epics);
     const s = combinedEpics(action$)
       .pipe(
         scan<Action, State>((prevState, action) => {
+          if (typeof reducers === 'function') {
+            // will accept single reducer function as well
+            const newState = reducers(prevState, action);
+            return { ...prevState, ...newState };
+          }
+
           // get all keys of state
           const stateKeys = Object.keys(reducers);
           const newState = {};
@@ -59,7 +68,12 @@ const StoreProvider = ({
   store: Store;
   children: ReactNode;
 }) => {
-  const stateProps = useStore(store.reducers, store.initialState, store.epics);
+  const memoStore = useMemo(() => store, [store]);
+  const stateProps = useStore(
+    memoStore.reducers,
+    memoStore.epics,
+    memoStore.initialState,
+  );
   const ui = typeof children === 'function' ? children(stateProps) : children;
   return <StoreContext.Provider value={stateProps}>{ui}</StoreContext.Provider>;
 };
@@ -70,7 +84,16 @@ export const useSelector = (callback: Function) => {
   return useMemo(() => state, [state]);
 };
 
-const getInitialState = (reducers: Reducers, initialState: State) => {
+const getInitialState = (
+  reducers: Reducers | Function,
+  initialState: State,
+) => {
+  if (typeof reducers === 'function') {
+    // will accept single reducer function as well
+    const reducerInitialState = reducers(undefined, {});
+    return { ...initialState, ...reducerInitialState };
+  }
+
   const stateFromReducers = Object.keys(reducers).reduce((acc, key) => {
     const reducer = reducers[key];
     return {
@@ -83,14 +106,14 @@ const getInitialState = (reducers: Reducers, initialState: State) => {
 };
 
 export const createStore = (
-  reducers: Reducers,
-  initialState: State = {},
+  reducers: Reducers | Function,
   epics: Epics = [],
+  initialState: State = {},
 ) => {
   return {
     reducers,
-    initialState: getInitialState(reducers, initialState),
     epics,
+    initialState: getInitialState(reducers, initialState),
   };
 };
 
